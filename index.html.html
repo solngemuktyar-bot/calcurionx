@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Calculator</title>
+
+<style>
+body{
+margin:0;
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+font-family:Arial;
+}
+
+.calculator{
+width:360px;
+background:rgba(255,255,255,0.06);
+backdrop-filter:blur(15px);
+border-radius:20px;
+padding:20px;
+box-shadow:0 0 30px rgba(0,0,0,0.6);
+}
+
+.history{
+height:70px;
+color:#ccc;
+font-size:14px;
+overflow-y:auto;
+margin-bottom:5px;
+}
+
+.display{
+background:black;
+color:#00ffcc;
+font-size:26px;
+text-align:right;
+padding:15px;
+border-radius:12px;
+margin-bottom:5px;
+min-height:50px;
+}
+
+.result{
+color:white;
+text-align:right;
+font-size:18px;
+min-height:25px;
+margin-bottom:15px;
+}
+
+.buttons{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:10px;
+}
+
+button{
+height:60px;
+font-size:20px;
+border-radius:15px;
+border:2px solid #00ffcc;
+background:transparent;
+color:white;
+cursor:pointer;
+transition:.2s;
+}
+
+button:hover{
+background:#00ffcc;
+color:black;
+}
+
+button:active{
+transform:scale(.9);
+}
+
+.equal{
+grid-column:span 2;
+background:#00ffcc;
+color:black;
+font-weight:bold;
+}
+</style>
+</head>
+<body>
+
+<div class="calculator">
+
+<div class="history" id="history"></div>
+
+<div class="display" id="display">0</div>
+<div class="result" id="result"></div>
+
+<div class="buttons">
+<button onclick="clearAll()">C</button>
+<button onclick="backspace()">⌫</button>
+<button onclick="appendPercent()">%</button>
+<button onclick="appendOperator('÷','/')">÷</button>
+
+<button onclick="appendNumber('7')">7</button>
+<button onclick="appendNumber('8')">8</button>
+<button onclick="appendNumber('9')">9</button>
+<button onclick="appendOperator('×','*')">×</button>
+
+<button onclick="appendNumber('4')">4</button>
+<button onclick="appendNumber('5')">5</button>
+<button onclick="appendNumber('6')">6</button>
+<button onclick="appendOperator('−','-')">−</button>
+
+<button onclick="appendNumber('1')">1</button>
+<button onclick="appendNumber('2')">2</button>
+<button onclick="appendNumber('3')">3</button>
+<button onclick="appendOperator('+','+')">+</button>
+
+<button onclick="appendNumber('0')">0</button>
+<button onclick="appendDot()">.</button>
+<button class="equal" onclick="finalize()">=</button>
+</div>
+
+</div>
+
+<script>
+let display=document.getElementById("display");
+let resultDiv=document.getElementById("result");
+let history=document.getElementById("history");
+let internal="";
+
+function updateLive(){
+try{
+if(internal==="" || "+-*/".includes(internal.slice(-1))){
+resultDiv.innerText="";
+return;
+}
+let res=eval(internal);
+resultDiv.innerText="= "+res;
+}catch{
+resultDiv.innerText="";
+}
+}
+
+function appendNumber(num){
+if(display.innerText==="0"){
+display.innerText=num;
+internal=num;
+}else{
+display.innerText+=num;
+internal+=num;
+}
+updateLive();
+}
+
+function appendOperator(symbol,op){
+if(internal==="") return;
+
+if("+-*/".includes(internal.slice(-1))){
+internal=internal.slice(0,-1)+op;
+display.innerText=display.innerText.slice(0,-1)+symbol;
+}else{
+internal+=op;
+display.innerText+=symbol;
+}
+updateLive();
+}
+
+function appendDot(){
+let parts=internal.split(/[\+\-\*\/]/);
+if(!parts[parts.length-1].includes(".")){
+internal+=".";
+display.innerText+=".";
+}
+updateLive();
+}
+
+function appendPercent(){
+if(internal!==""){
+internal=String(eval(internal)/100);
+display.innerText=internal;
+updateLive();
+}
+}
+
+function clearAll(){
+display.innerText="0";
+internal="";
+resultDiv.innerText="";
+history.innerHTML=""; // history clear
+}
+
+function backspace(){
+internal=internal.slice(0,-1);
+display.innerText=display.innerText.slice(0,-1);
+if(display.innerText===""){
+display.innerText="0";
+internal="";
+}
+updateLive();
+}
+
+function finalize(){
+if(resultDiv.innerText!==""){
+let finalResult=resultDiv.innerText.replace("= ","");
+let item=document.createElement("div");
+item.innerText=display.innerText+" = "+finalResult;
+history.prepend(item);
+
+display.innerText=finalResult;
+internal=finalResult;
+resultDiv.innerText="";
+}
+}
+</script>
+
+</body>
+</html>
